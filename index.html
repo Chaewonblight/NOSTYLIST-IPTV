@@ -26,10 +26,10 @@
     <script>
         const channelData = [
             {
-                src: "https://linearjitp02-playback.astro.com.my/dash-wv/linear/9983/default.mpd",
+                src: "https://qp-pldt-live-grp-09-prod.akamaized.net/out/u/cg_tvnpre.mpd",
                 img: "https://i.imgur.com/Nd9gqA2.png",
                 name: "KPLUS",
-                key: "aa48b28bd723f91214887df6ed9fad10:b5a3a800848120c843ae0fa68c09c261"
+                key: "e1bde543e8a140b38d3f84ace746553e:b712c4ec307300043333a6899a402c10"
             },
             { src: "https://jungotvstream-chanall.akamaized.net/jungotv/hallypop/stream.m3u8", img: "https://i.imgur.com/TT27L6j.png", name: "HALLYPOP" }
         ];
@@ -38,6 +38,12 @@
         let currentPage = 0;
         let activeTile = null;
         let activeTileIndex = null;
+
+        const player = videojs('video-player', {
+            controls: true,
+            responsive: true,
+            fluid: true,
+        });
 
         function loadTiles(page) {
             const start = page * pageSize;
@@ -49,7 +55,6 @@
                 const tile = document.createElement('div');
                 tile.classList.add('tile');
                 tile.setAttribute('data-source', channel.src);
-                if (channel.key) tile.setAttribute('data-key', channel.key);
                 tile.innerHTML = `
                     <img src="${channel.img}" alt="${channel.name}">
                     <span>${channel.name}</span>
@@ -70,58 +75,19 @@
             activeTile = tile;
         }
 
-        document.getElementById('prev-page').addEventListener('click', () => {
-            if (currentPage > 0) {
-                currentPage--;
-                loadTiles(currentPage);
+        document.getElementById('channel-selector').addEventListener('click', function(event) {
+            const tile = event.target.closest('.tile');
+            if (tile) {
+                const source = tile.getAttribute('data-source');
+                player.src({ src: source, type: source.endsWith('.m3u8') ? 'application/x-mpegURL' : 'application/dash+xml' });
+                updateActiveTile(tile);
             }
         });
 
-        document.getElementById('next-page').addEventListener('click', () => {
-            if (currentPage < Math.ceil(channelData.length / pageSize) - 1) {
-                currentPage++;
-                loadTiles(currentPage);
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTiles(currentPage);
         });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const video = document.getElementById('video-player');
-            const player = new shaka.Player(video);
-
-            async function loadVideo(manifestUri, keySystem = null) {
-                const isHLS = manifestUri.endsWith('.m3u8');
-                if (isHLS && Hls.isSupported()) {
-                    const hls = new Hls();
-                    hls.loadSource(manifestUri);
-                    hls.attachMedia(video);
-                } else {
-                    const config = keySystem ? { drm: { clearKeys: parseClearKey(keySystem) } } : {};
-                    player.configure(config);
-                    await player.load(manifestUri);
-                }
-                video.play();
-            }
-
-            function parseClearKey(keyString) {
-                const keys = keyString.split(',');
-                const keyObject = {};
-                keys.forEach(pair => {
-                    const [keyId, key] = pair.split(':');
-                    keyObject[keyId] = key;
-                });
-                return keyObject;
-            }
-
-            document.getElementById('channel-selector').addEventListener('click', function(event) {
-                const tile = event.target.closest('.tile');
-                if (tile) {
-                    const source = tile.getAttribute('data-source');
-                    const key = tile.getAttribute('data-key') || null;
-                    loadVideo(source, key);
-                    updateActiveTile(tile);
-                }
-            });        
-			
+	    
             document.addEventListener('contextmenu', (e) => e.preventDefault());
 
             function ctrlShiftKey(e, keyCode) {
