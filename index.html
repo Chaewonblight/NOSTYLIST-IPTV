@@ -5,15 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VLONE IPTV</title>
     <link rel="icon" type="image/png" href="https://i.imgur.com/ZrYMYLQ.png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.0/hls.min.js"></script>
+    <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-http-streaming@2.15.0/dist/videojs-http-streaming.min.js"></script>
     <script src="https://dunggramer.github.io/disable-devtool/disable-devtool.min.js" defer></script>
 	<link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1><i>vlone iptv.</i></h1>
     <div id="video-container">
-        <video id="video-player" controls autoplay></video>
+        <video
+            id="video-player"
+            class="video-js vjs-default-skin vjs-big-play-centered"
+            controls
+            autoplay
+            preload="auto"
+            data-setup='{"fluid": true, "playbackRates": [0.5, 1, 1.5, 2]}'>
+        </video>
     </div>
 
     <div id="channel-selector"></div>
